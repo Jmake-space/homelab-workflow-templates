@@ -1,0 +1,34 @@
+name: k3s-rollout-check
+
+on:
+  workflow_dispatch:
+    inputs:
+      namespace:
+        description: "Kubernetes namespace"
+        required: true
+        default: "default"
+      deployment:
+        description: "Deployment name"
+        required: true
+        default: ""
+
+jobs:
+  rollout:
+    runs-on: [self-hosted, pi5, docker]
+    steps:
+      - name: Verify kubectl
+        run: |
+          if ! command -v kubectl >/dev/null 2>&1; then
+            echo "kubectl not found on runner"
+            exit 1
+          fi
+      - name: Rollout status
+        env:
+          NS: ${{ github.event.inputs.namespace }}
+          DEPLOY: ${{ github.event.inputs.deployment }}
+        run: |
+          if [ -z "$DEPLOY" ]; then
+            echo "Deployment name required"
+            exit 1
+          fi
+          kubectl -n "$NS" rollout status deployment/"$DEPLOY"

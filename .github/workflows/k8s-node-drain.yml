@@ -1,0 +1,39 @@
+name: k8s-node-drain
+
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: "Node name to cordon/drain"
+        required: true
+        default: ""
+      force:
+        description: "Force drain (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  drain:
+    runs-on: [self-hosted, pi5, docker]
+    steps:
+      - name: Verify kubectl
+        run: |
+          if ! command -v kubectl >/dev/null 2>&1; then
+            echo "kubectl not found on runner"
+            exit 1
+          fi
+      - name: Cordon + drain
+        env:
+          NODE: ${{ github.event.inputs.node }}
+          FORCE: ${{ github.event.inputs.force }}
+        run: |
+          if [ -z "$NODE" ]; then
+            echo "Node name required"
+            exit 1
+          fi
+          kubectl cordon "$NODE"
+          if [ "$FORCE" = "true" ]; then
+            kubectl drain "$NODE" --ignore-daemonsets --delete-emptydir-data --force
+          else
+            kubectl drain "$NODE" --ignore-daemonsets --delete-emptydir-data
+          fi
