@@ -8,6 +8,10 @@ runner (`pi5`, Docker-based).
 ## Visual overview
 ![Workflow flow diagram](assets/flow.svg)
 
+## Related repos
+- `homelab-actions`: live workflows (including `k3s-node-alert` dispatch).
+- `k3s-cluster`: CronJob that triggers `repository_dispatch` events.
+
 ## Runner labels
 - `self-hosted`
 - `pi5`
